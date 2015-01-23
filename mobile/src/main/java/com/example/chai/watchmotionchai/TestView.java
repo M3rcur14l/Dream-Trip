@@ -11,15 +11,17 @@ import android.view.View;
  */
 public class TestView extends View {
 
+    private Paint paint;
+
     public TestView(Context context) {
         super(context);
+        paint = new Paint();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        Paint paint = new Paint();
         paint.setColor(Color.RED);
-        canvas.drawCircle(canvas.getWidth()/2,canvas.getHeight()/2,50,paint);
+        canvas.drawCircle(canvas.getWidth() / 2, canvas.getHeight() / 2, 50, paint);
+        super.onDraw(canvas);
     }
 }
