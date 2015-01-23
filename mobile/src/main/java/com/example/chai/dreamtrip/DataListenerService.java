@@ -1,13 +1,11 @@
-package com.example.chai.watchmotionchai;
+package com.example.chai.dreamtrip;
 
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 /**

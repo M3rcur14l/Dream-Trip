@@ -1,4 +1,4 @@
-package com.example.chai.watchmotionchai;
+package com.example.chai.dreamtrip;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

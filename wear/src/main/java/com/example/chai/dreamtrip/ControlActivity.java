@@ -1,4 +1,4 @@
-package com.example.chai.watchmotionchai;
+package com.example.chai.dreamtrip;
 
 import android.app.Activity;
 import android.hardware.Sensor;
@@ -9,25 +9,21 @@ import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-public class MainActivity extends Activity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks {
+public class ControlActivity extends Activity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String DATA_ITEM = "/mydata";
 
-    private TextView mTextView;
+    private Button restartButton;
     private SensorManager mSensorManager;
     private Sensor accelerometer;
 
     private GoogleApiClient mApiClient;
-    int counter = 0;
 
     private float gravity[] = {9.81f, 9.81f, 9.81f}; //earth acceleration
     private float linear_acceleration[] = {0f, 0f, 0f};
@@ -42,10 +38,16 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                mTextView = (TextView) stub.findViewById(R.id.text);
+                restartButton = (Button) stub.findViewById(R.id.start_btn);
+                restartButton.setText("RESTART");
+                restartButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        restart();
+                    }
+                });
             }
         });
-
 
         initGoogleApiClient();
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -56,6 +58,11 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     public void onStart() {
         super.onStart();
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -71,53 +78,23 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
 
     @Override
     public void onConnected(Bundle bundle) {
-        mTextView.setText("Wear connected");
         //Toast.makeText(this, "Wearconnected", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        mTextView.setText("Wear suspended");
         // Toast.makeText(this,"Wear connection suspended", Toast.LENGTH_SHORT).show();
     }
 
-    public void startToMeasure(View v) {
-        Button startStopButton = (Button) v;
-
-        String text = "counter: ";
-        if (linear_acceleration != null) {
-            if (linear_acceleration.length != 0) {
-                for (int i = 0; i < linear_acceleration.length; i++) {
-                    text = text + linear_acceleration[i];
-                }
-                sendMessage(DATA_ITEM, text);
-            }
-        } else {
-            sendMessage(DATA_ITEM, text + counter++);
-        }
-
-
-    }
 
     private void sendMessage(final String path, final String text) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (mApiClient == null) {
-                    initGoogleApiClient();
-                    return;
-                }
                 NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mApiClient).await();
                 for (Node node : nodes.getNodes()) {
-                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mApiClient, node.getId(), path, text.getBytes()).await();
-
+                    Wearable.MessageApi.sendMessage(mApiClient, node.getId(), path, text.getBytes()).await();
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mTextView.setText("message sent");
-                    }
-                });
             }
         }).start();
     }
@@ -151,5 +128,9 @@ public class MainActivity extends Activity implements SensorEventListener, Googl
     public void onDestroy() {
         super.onDestroy();
         mApiClient.disconnect();
+    }
+
+    public void restart() {
+        recreate();
     }
 }

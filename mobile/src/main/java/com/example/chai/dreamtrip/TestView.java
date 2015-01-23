@@ -1,4 +1,4 @@
-package com.example.chai.watchmotionchai;
+package com.example.chai.dreamtrip;
 
 import android.content.Context;
 import android.graphics.Canvas;

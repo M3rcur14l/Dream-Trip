@@ -1,17 +1,19 @@
-package com.example.chai.watchmotionchai;
+package com.example.chai.dreamtrip;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,11 +21,9 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
 
-public class MainActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks {
+public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks {
 
-    private TextView xText;
-    private TextView yText;
-    private TextView zText;
+    private TextView xText, yText, zText, maxXText, maxYText, maxZText;
     private TestView testView;
 
     private GoogleApiClient mApiClient;
@@ -41,19 +41,27 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             public void onReceive(Context context, Intent intent) {
                 String result = intent.getStringExtra("MESSAGE");
                 String values[] = result.split(",");
+                if (Float.parseFloat(maxXText.getText().toString()) < Float.parseFloat(values[0])) {
+                    maxXText.setText(values[0]);
+                }
+                if (Float.parseFloat(maxYText.getText().toString()) < Float.parseFloat(values[1])) {
+                    maxXText.setText(values[1]);
+                }
+                if (Float.parseFloat(maxZText.getText().toString()) < Float.parseFloat(values[2])) {
+                    maxXText.setText(values[2]);
+                }
                 xText.setText(values[0]);
                 yText.setText(values[1]);
                 zText.setText(values[2]);
 
-                testView.setX(testView.getX() +  Float.parseFloat(values[1]) * 10);
-                testView.setY(testView.getY() -  Float.parseFloat(values[0]) * 10);
+                testView.setX(testView.getX() + Float.parseFloat(values[1]) * 20);
+                testView.setY(testView.getY() - Float.parseFloat(values[0]) * 10);
             }
         };
     }
 
     @Override
     public void onStart() {
-
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("REQUEST_PROCESSED"));
     }
@@ -79,6 +87,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         xText = (TextView) findViewById(R.id.x_value);
         yText = (TextView) findViewById(R.id.y_value);
         zText = (TextView) findViewById(R.id.z_value);
+        maxXText = (TextView) findViewById(R.id.max_x_value);
+        maxYText = (TextView) findViewById(R.id.max_y_value);
+        maxZText = (TextView) findViewById(R.id.max_z_value);
         RelativeLayout mainLayout = (RelativeLayout) findViewById(R.id.main_layout);
         testView = new TestView(this);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
@@ -100,7 +111,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     //stopservice when click start button
     public void stopMyService(View v) {
-
         Toast.makeText(this, "service stopped", Toast.LENGTH_SHORT).show();
     }
 
@@ -110,28 +120,5 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         super.onDestroy();
         mApiClient.disconnect();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
