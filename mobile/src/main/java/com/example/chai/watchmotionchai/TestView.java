@@ -1,0 +1,25 @@
+package com.example.chai.watchmotionchai;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.view.View;
+
+/**
+ * Created by Chai on 23/01/2015.
+ */
+public class TestView extends View {
+
+    public TestView(Context context) {
+        super(context);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        canvas.drawCircle(canvas.getWidth()/2,canvas.getHeight()/2,50,paint);
+    }
+}
