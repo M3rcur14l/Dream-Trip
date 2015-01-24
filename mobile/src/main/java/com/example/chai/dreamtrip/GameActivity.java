@@ -96,7 +96,7 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
                 String values[] = result.split(",");
 
 
-                requestUpdateToRenderer(Float.parseFloat(values[1]) / 40, Float.parseFloat(values[0]) / 25);
+                requestUpdateToRenderer(Float.parseFloat(values[1]) / 30, Float.parseFloat(values[0]) / 25);
 
 
             }

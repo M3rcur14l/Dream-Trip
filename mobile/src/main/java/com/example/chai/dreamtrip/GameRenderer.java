@@ -9,10 +9,14 @@ import android.view.Display;
 import android.view.WindowManager;
 
 
+import com.example.chai.dreamtrip.model.Enemy;
 import com.example.chai.dreamtrip.model.GameObject;
 import com.example.chai.dreamtrip.opengl.TextureShaderProgram;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -52,8 +56,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private GameObject background_low1;
     private GameObject background_low2;
     private GameObject background_low3;
-    private ArrayList<GameObject> backgroundStripList = new ArrayList<>();
-    private GameObject background;
 
     private float unitX;
     private float unitY;
@@ -82,7 +84,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
         //game elements
-        background = new GameObject(context, -1, -1, 2, 2, R.drawable.sky_background);
         //ration w/h
         background_low0 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
         background_low1 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
@@ -93,10 +94,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         background_low2 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
         background_low3 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
 
-        backgroundStripList.add(background_low0);
-        backgroundStripList.add(background_low1);
-        backgroundStripList.add(background_low2);
-        backgroundStripList.add(background_low3);
 
         ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
 
@@ -117,7 +114,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl10) {
         /*first method to call*/
         initDrawingSetting();
-        //drawElement(background);
+
 
 
 
@@ -246,12 +243,32 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         textureProgram.useProgram();
     }
 
+    private List<Enemy> enemies = new LinkedList<>();
+
+    private final static int MAX_ENEMY_PER_LINE = 6;
+    private final static int MIN_ENEMY_PER_LINE = 3;
+
+    private final static int MAX_ENEMY_PER_COL = 1;
+    private final static int MIN_ENEMY_PER_COL = 3;
+
+
+    public LinkedList<Enemy> populateScreenWithMushrooms() {
+        LinkedList<Enemy> enemies = new LinkedList<Enemy>();
+        Enemy enemy;
+
+        int min = 1;
+        int max = 3;
+        int enemy_per_row;
+        int count;
+		/*
+		 * warning here! set a number big enough to populate
+		 */
+        int max_enemy_per_column = 8;
+
+        return null;
+    }
+
     /*
-
-
-
-
-
     * Called to update the ship position*/
     public void updateShipPosition(float x, float y) {
 
