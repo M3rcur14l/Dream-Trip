@@ -82,6 +82,17 @@ public class Enemy {
 
     }
 
+    private int DIRECTION_X = 1;
+    private int DIRECTION_Y = 1;
+
+    public void changeYDirection() {
+        DIRECTION_Y = DIRECTION_Y * (-1);
+    }
+
+    public void changeXDirection() {
+        DIRECTION_X = DIRECTION_X * (-1);
+    }
+
     public Enemy(Context context, float posX, float posY, float width, float height, int[] resID) {
         this.context = context;
         setX(posX);
@@ -126,11 +137,17 @@ public class Enemy {
         this.resIDs = resIDs;
     }
 
+    boolean moveLinearly = false;
+    public void setLineaMovement(boolean b){
+        moveLinearly = true;
+    }
     public void updatePosition() {
         float newX = getX() - speed;
         setX(newX);
-
-
+        if(!moveLinearly) {
+            float newY = getY() + speed * DIRECTION_Y;
+            setY(newY);
+        }
         float x = getX();
         float y = getY();
 
