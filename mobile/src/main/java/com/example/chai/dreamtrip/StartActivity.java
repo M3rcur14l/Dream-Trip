@@ -1,6 +1,7 @@
 package com.example.chai.dreamtrip;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -70,6 +71,8 @@ public class StartActivity extends Activity{
                     Bitmap bm = BitmapUtils.getBitmap("img/start.png", StartActivity.this);
                     bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
                     start.setImageBitmap(bm);
+
+                    startActivity(new Intent(StartActivity.this, GameActivity.class));
                     return true;
                 } else
                     return false;
