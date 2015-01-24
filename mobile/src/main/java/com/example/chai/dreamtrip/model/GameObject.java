@@ -30,7 +30,8 @@ public class GameObject {
     private float Y;
     private float Width;
     private float Height;
-    private static final float SPEED = 0.005f;
+
+    private float speed = 0.005f;
     private int resId;
     int[] resIDs;
     private int numberOfFrames = 0;
@@ -71,15 +72,16 @@ public class GameObject {
                 // Order of coordinates: X, Y, S, T
                 // Triangle strip
                 x, y, 0f, 1f,
-                x, y + getHeight(),0f, 0f,
-                x + getWidth(),y + getHeight(), 1f, 0f,
+                x, y + getHeight(), 0f, 0f,
+                x + getWidth(), y + getHeight(), 1f, 0f,
                 x, y, 0f, 1f,
-                x + getWidth(), y , 1f, 1f
-               };
+                x + getWidth(), y, 1f, 1f
+        };
         DINAMIC_DATA = DINAMIC_VERTEX_DATA;
         vertexArray = new VertexArray(DINAMIC_DATA);
 
     }
+
     public GameObject(Context context, float posX, float posY, float width, float height, int[] resID) {
         this.context = context;
         setX(posX);
@@ -100,21 +102,22 @@ public class GameObject {
                 // Order of coordinates: X, Y, S, T
                 // Triangle strip
                 x, y, 0f, 1f,
-                x, y + getHeight(),0f, 0f,
-                x + getWidth(),y + getHeight(), 1f, 0f,
+                x, y + getHeight(), 0f, 0f,
+                x + getWidth(), y + getHeight(), 1f, 0f,
                 x, y, 0f, 1f,
-                x + getWidth(), y , 1f, 1f
+                x + getWidth(), y, 1f, 1f
         };
         DINAMIC_DATA = DINAMIC_VERTEX_DATA;
         vertexArray = new VertexArray(DINAMIC_DATA);
 
     }
 
-    public void loadGraphics(int[] rIds){
-        for(int i = 0 ; i < rIds.length; i++){
+    public void loadGraphics(int[] rIds) {
+        for (int i = 0; i < rIds.length; i++) {
             resIDs[i] = TextureHelper.loadTexture(context, rIds[i]);
         }
     }
+
     public int[] getResIDs() {
         return resIDs;
     }
@@ -124,7 +127,7 @@ public class GameObject {
     }
 
     public void updatePosition() {
-        float newX = getX() - SPEED;
+        float newX = getX() - speed;
         setX(newX);
 
 
@@ -152,7 +155,7 @@ public class GameObject {
         DINAMIC_DATA[15] = 1f;
 
         DINAMIC_DATA[16] = x + getWidth();
-        DINAMIC_DATA[17] = y ;
+        DINAMIC_DATA[17] = y;
         DINAMIC_DATA[18] = 1f;
         DINAMIC_DATA[19] = 1f;
 
@@ -161,9 +164,13 @@ public class GameObject {
     }
 
     public void updatePosition(float posX, float posY) {
+        float shipPosX = getX();
+        float shipPosY = getY();
 
-        setX(posX);
-        setY(posY);
+        shipPosX = shipPosX + posX;
+        shipPosY = shipPosY + posY;
+        setX(shipPosX);
+        setY(shipPosY);
 
         float x = getX();
         float y = getY();
@@ -189,7 +196,7 @@ public class GameObject {
         DINAMIC_DATA[15] = 1f;
 
         DINAMIC_DATA[16] = x + getWidth();
-        DINAMIC_DATA[17] = y ;
+        DINAMIC_DATA[17] = y;
         DINAMIC_DATA[18] = 1f;
         DINAMIC_DATA[19] = 1f;
 
@@ -256,6 +263,14 @@ public class GameObject {
 
     public void setX(float x) {
         X = x;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
     }
 
 

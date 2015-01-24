@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
-
+/*
 public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks {
 
     private TextView xText, yText, zText, maxXText, maxYText, maxZText;
@@ -96,16 +96,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     }
 
 
-    //start service when click start button
-    public void startMyService(View v) {
 
-        Toast.makeText(this, "service started", Toast.LENGTH_SHORT).show();
-    }
-
-
-    //stopservice when click start button
-    public void stopMyService(View v) {
-        Toast.makeText(this, "service stopped", Toast.LENGTH_SHORT).show();
-    }
 
 }
+*/

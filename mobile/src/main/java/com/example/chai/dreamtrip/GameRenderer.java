@@ -76,7 +76,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        GLES20.glClearColor(0.520f, 0.80f, 0.92f, 5.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         //load the program
         textureProgram = new TextureShaderProgram(context);
 
@@ -84,18 +84,21 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         //game elements
         background = new GameObject(context, -1, -1, 2, 2, R.drawable.sky_background);
         //ration w/h
-        background_low0 = new GameObject(context, -1f, -1f, 4f, 0.65f, R.drawable.land_second_1part);
-        background_low1 = new GameObject(context, 3f, -1f, 4f, 0.65f, R.drawable.land_second_2part);
+        background_low0 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
+        background_low1 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
+        background_low0.setSpeed(0.002f);
+        background_low1.setSpeed(0.002f);
 
-        background_low2 = new GameObject(context, -1f, -1f, 4f, 0.65f, R.drawable.land_first_1part);
-        background_low3 = new GameObject(context, 1f, -1f, 4f, 0.65f, R.drawable.land_first_2part);
+
+        background_low2 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
+        background_low3 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
 
         backgroundStripList.add(background_low0);
         backgroundStripList.add(background_low1);
         backgroundStripList.add(background_low2);
         backgroundStripList.add(background_low3);
 
-        ship = new GameObject(context, 0f, 0f, 0.4f, 0.38f, shipsResId);
+        ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
 
 
     }
@@ -114,9 +117,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl10) {
         /*first method to call*/
         initDrawingSetting();
-        drawElement(background);
+        //drawElement(background);
+
+
 
         drawLowBackgroundStrips();
+        drawLowBackgroundStrips2();
 
         drawElement(ship);
 
@@ -126,24 +132,68 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     boolean startSecondtrip = false;
     boolean starFirstdtrip = true;
 
+
     public void drawLowBackgroundStrips() {
 
         if (starFirstdtrip) {
             drawElement(background_low0);
             background_low0.updatePosition();
-            if ((background_low0.getX()-background_low0.getWidth()) == -1) {
+            if(background_low0.getX()<=-3f) {
+                drawElement(background_low1);
+                background_low1.updatePosition();
+            }
+            if ((background_low0.getX()<= -5f)) {
                 background_low0.setX(1);
                 startSecondtrip = true;
                 starFirstdtrip = false;
             }
         }
+
         if (startSecondtrip) {
             drawElement(background_low1);
             background_low1.updatePosition();
-            if ((background_low1.getX()- background_low1.getWidth()) == -1) {
+            if(background_low1.getX()<=-3f) {
+                drawElement(background_low0);
+                background_low0.updatePosition();
+            }
+            if ((background_low1.getX()<= -5f)) {
                 background_low1.setX(1);
                 startSecondtrip = false;
                 starFirstdtrip = true;
+            }
+        }
+
+
+    }
+    boolean starFirstdtrip2 = true;
+    boolean startSecondtrip2 = false;
+    public void drawLowBackgroundStrips2() {
+
+        if (starFirstdtrip2) {
+            drawElement(background_low2);
+            background_low2.updatePosition();
+            if(background_low2.getX()<=-3f) {
+                drawElement(background_low3);
+                background_low3.updatePosition();
+            }
+            if ((background_low2.getX()<= -5f)) {
+                background_low2.setX(1);
+                startSecondtrip2 = true;
+                starFirstdtrip2 = false;
+            }
+        }
+
+        if (startSecondtrip2) {
+            drawElement(background_low3);
+            background_low3.updatePosition();
+            if(background_low3.getX()<=-3f) {
+                drawElement(background_low2);
+                background_low2.updatePosition();
+            }
+            if ((background_low3.getX()<= -5f)) {
+                background_low3.setX(1);
+                startSecondtrip2 = false;
+                starFirstdtrip2 = true;
             }
         }
 
@@ -203,7 +253,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
     * Called to update the ship position*/
-    public void updateShipPosition(int x, int y) {
+    public void updateShipPosition(float x, float y) {
+
+        ship.updatePosition(x,y);
 
 
     }
