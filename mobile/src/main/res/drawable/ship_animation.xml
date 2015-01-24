@@ -1,0 +1,20 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ship_animation"
+    android:oneshot="false">
+    <item
+        android:drawable="@drawable/ship1"
+        android:duration="150" />
+    <item
+        android:drawable="@drawable/ship2"
+        android:duration="150" />
+    <item
+        android:drawable="@drawable/ship3"
+        android:duration="150" />
+    <item
+        android:drawable="@drawable/ship4"
+        android:duration="150" />
+    <item
+        android:drawable="@drawable/ship5"
+        android:duration="150" />
+
+</animation-list>

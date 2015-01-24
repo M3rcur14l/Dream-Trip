@@ -116,7 +116,6 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
             }
             sendMessage(DATA_ITEM, text);
         }
-
     }
 
     @Override

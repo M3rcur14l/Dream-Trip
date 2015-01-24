@@ -1,0 +1,62 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.chai.dreamtrip.StartActivity">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/start_background"
+        android:scaleType="fitXY"
+        />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/fixed_stars"
+        android:scaleType="fitXY"
+        />
+
+    <ImageView
+        android:id="@+id/blinking_stars_1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/blinking_stars_1"
+        android:scaleType="fitXY"
+        />
+
+    <ImageView
+        android:id="@+id/blinking_stars_2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/blinking_stars_2"
+        android:scaleType="fitXY"
+        />
+
+    <ImageView
+        android:id="@+id/ship"
+        android:layout_marginTop="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+    <ImageView
+        android:id="@+id/start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/start"/>
+
+    <ImageView
+        android:id="@+id/options"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/options"/>
+
+    <ImageView
+        android:id="@+id/credits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/credits"/>
+
+
+</RelativeLayout>

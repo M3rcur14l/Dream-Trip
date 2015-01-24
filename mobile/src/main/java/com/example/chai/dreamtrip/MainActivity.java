@@ -5,15 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,15 +37,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
             public void onReceive(Context context, Intent intent) {
                 String result = intent.getStringExtra("MESSAGE");
                 String values[] = result.split(",");
-                if (Float.parseFloat(maxXText.getText().toString()) < Float.parseFloat(values[0])) {
-                    maxXText.setText(values[0]);
-                }
-                if (Float.parseFloat(maxYText.getText().toString()) < Float.parseFloat(values[1])) {
-                    maxXText.setText(values[1]);
-                }
-                if (Float.parseFloat(maxZText.getText().toString()) < Float.parseFloat(values[2])) {
-                    maxXText.setText(values[2]);
-                }
                 xText.setText(values[0]);
                 yText.setText(values[1]);
                 zText.setText(values[2]);
