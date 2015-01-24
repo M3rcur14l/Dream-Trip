@@ -53,6 +53,13 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("REQUEST_PROCESSED"));
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        mApiClient.disconnect();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+    }
+
     public void initGoogleApiClient() {
         mApiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();
         mApiClient.connect();
@@ -101,11 +108,4 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         Toast.makeText(this, "service stopped", Toast.LENGTH_SHORT).show();
     }
 
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mApiClient.disconnect();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
-    }
 }

@@ -102,7 +102,7 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            final float alpha = 0.8f;
+            final float alpha = 0.7f;
             String text = "";
             gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
             gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
