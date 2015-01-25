@@ -1,6 +1,8 @@
 package com.example.chai.dreamtrip;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
@@ -9,8 +11,8 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,13 +23,16 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import com.example.chai.dreamtrip.utils.BitmapUtils;
-import com.example.chai.dreamtrip.utils.FasterAnimationsContainer;
+import com.example.chai.dreamtrip.utils.MusicService;
 
 import java.util.concurrent.TimeUnit;
 
-public class StartActivity extends Activity {
+public class StartActivity extends Activity implements ServiceConnection {
 
     private ImageView loading;
+    private boolean mIsBound = false;
+    private MusicService mServ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +51,6 @@ public class StartActivity extends Activity {
         final Matrix matrix = new Matrix();
         matrix.postScale(scaleX, scaleY);
         Bitmap bm;
-
 
         loading = (ImageView) findViewById(R.id.loading);
         loading.setBackgroundResource(R.drawable.loading_animation);
@@ -125,6 +129,9 @@ public class StartActivity extends Activity {
                     Bitmap bm = BitmapUtils.getBitmap("img/options.png", StartActivity.this);
                     bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
                     options.setImageBitmap(bm);
+
+                    mServ.start();
+
                     return true;
                 } else
                     return false;
@@ -153,13 +160,25 @@ public class StartActivity extends Activity {
                     return false;
             }
         });
+
+        Intent music = new Intent(this, MusicService.class);
+        startService(music);
+        doBindService();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        MediaPlayer mediaPlayer = MediaPlayer.create(StartActivity.this, R.raw.main_music);
-        mediaPlayer.start();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -171,7 +190,33 @@ public class StartActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        doUnbindService();
     }
+
+    public void onServiceConnected(ComponentName name, IBinder binder) {
+        mServ = ((MusicService.ServiceBinder) binder).getService();
+        mServ.start();
+    }
+
+    public void onServiceDisconnected(ComponentName name) {
+        mServ = null;
+    }
+
+    public void doBindService() {
+        // activity connects to the service.
+        Intent intent = new Intent(this, MusicService.class);
+        bindService(intent, this, Context.BIND_AUTO_CREATE);
+        mIsBound = true;
+    }
+
+    public void doUnbindService() {
+        // disconnects the service activity.
+        if (mIsBound) {
+            unbindService(this);
+            mIsBound = false;
+        }
+    }
+
 }
 
 

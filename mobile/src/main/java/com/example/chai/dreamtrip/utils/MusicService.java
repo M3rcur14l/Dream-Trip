@@ -1,28 +1,28 @@
 package com.example.chai.dreamtrip.utils;
 
+import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnErrorListener;
 import android.os.Binder;
 import android.os.IBinder;
-import android.widget.MediaController;
 import android.widget.Toast;
-import android.app.Service;
-import android.media.MediaPlayer.OnErrorListener;
+import android.widget.MediaController;
 
 import com.example.chai.dreamtrip.R;
 
-/**
- * Created by Antonello on 24/01/2015.
- */
+//---------------------------------------------------------------------------------------
 public class MusicService extends Service
         implements
-        MediaPlayer.OnErrorListener,
+        OnErrorListener,
 
         // Interface used by the visual representation of the player controls.
         MediaController.MediaPlayerControl,
 
         // implemented to possibly upgrade the media player interface.
-        MediaPlayer.OnBufferingUpdateListener {
+        MediaPlayer.OnBufferingUpdateListener
+
+{
     // Connect service who to call onBind
     private final IBinder mBinder = new ServiceBinder();
 
@@ -37,7 +37,6 @@ public class MusicService extends Service
 
     // Called by the interface ServiceConnected when calling the service
     public class ServiceBinder extends Binder {
-
         public MusicService getService() {
             return MusicService.this;
         }
