@@ -14,19 +14,20 @@ import android.os.Bundle;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import com.example.chai.dreamtrip.utils.BitmapUtils;
+import com.example.chai.dreamtrip.utils.FasterAnimationsContainer;
 
 import java.util.concurrent.TimeUnit;
 
 public class StartActivity extends Activity {
 
-    ImageView loading;
-
+    private ImageView loading;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +35,7 @@ public class StartActivity extends Activity {
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_start);
 
         Display display = getWindowManager().getDefaultDisplay();
