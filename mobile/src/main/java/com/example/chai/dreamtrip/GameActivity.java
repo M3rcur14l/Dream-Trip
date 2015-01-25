@@ -18,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 
@@ -179,6 +181,18 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
     @Override
     public void onConnectionSuspended(int i) {
         Toast.makeText(this, "Wear connection suspended", Toast.LENGTH_SHORT).show();
+    }
+
+    public void sendMessage(final String path, final String text) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mApiClient).await();
+                for (Node node : nodes.getNodes()) {
+                    Wearable.MessageApi.sendMessage(mApiClient, node.getId(), path, text.getBytes()).await();
+                }
+            }
+        }).start();
     }
 
 }

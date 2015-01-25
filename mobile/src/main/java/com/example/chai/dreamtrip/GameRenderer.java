@@ -15,6 +15,7 @@ import com.example.chai.dreamtrip.opengl.TextureShaderProgram;
 import com.google.android.gms.games.Game;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,9 +37,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     enum GameState {GAME_OVER, GAME_PAUSED, GAME_STARTED}
 
-    ;
-
-    Context context;
+    private GameActivity context;
 
     private GameState state;
     private TextureShaderProgram textureProgram;
@@ -102,7 +101,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private float normalize;
 
 
-    public GameRenderer(Context c) {
+    public GameRenderer(GameActivity c) {
         context = c;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
@@ -151,15 +150,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         background_low2 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
         background_low3 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
 
-        if (level == 0)
+       // if (level == 0)
             launchStars();
-        if (level == 1)
-            launchFireEnemies();
+        //if (level == 1)
+           // launchFireEnemies();
 
         launchYellowStars();
 
 
-        lifeBar = new GameObject(context, -1f, 0.75f, 0.5f, 0.25f, R.drawable.life_bar);
+        lifeBar = new GameObject(context, -0.9f, 0.65f, 0.5f, 0.25f, R.drawable.life_bar);
         populateMonsters();
 
         ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
@@ -184,7 +183,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     public void populateMonsters() {
         for (int i = 0; i < monsterIds.length; i++) {
-            monster = new GameObject(context, -1f, 0.75f, 0.5f, 0.25f, monsterIds[i]);
+            monster = new GameObject(context, -0.9f, 0.65f, 0.5f, 0.25f, monsterIds[i]);
             monsterList.add(monster);
         }
     }
@@ -247,7 +246,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             drawLowBackgroundStrips2();
 
 
-            for (Enemy en : enemies) {
+            for (Iterator it = enemies.iterator(); it.hasNext(); ) {
+                Enemy en = (Enemy) it.next();
+
                 drawElement(en);
                 en.updatePosition();
                 if (en.getX() <= -1)
@@ -265,10 +266,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                     fire.setY(ship.getY() + ship.getHeight() / 2);*/
                         isBlinking = true;
                         gamePoint = gamePoint + 1;
+
+                        float randValue = (float) (Math.random() * 10) / 10;
+                        en.setX(1f + randValue);
                         if (gamePoint >= 8) {
                             gamePoint = 8;
-                            state = GameState.GAME_OVER;
-                            return;
+
+
                         }
                     }
                 }
@@ -297,6 +301,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         float randValue = (float) (Math.random() * 10) / 10;
                         en.setX(1f + randValue);
                         gamePoint = gamePoint - 1;
+                        context.sendMessage("/mydata", "VIBRATE");
                         if (gamePoint < 0) gamePoint = 0;
 
                     }
@@ -344,6 +349,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             for (int j = 0; j <= gamePoint; j++) {
                 drawElement(monsterList.get(j));
             }
+            if (gamePoint == 8) state = GameState.GAME_OVER;
 
         } else if (state == GameState.GAME_PAUSED) {
             //handle game pause state
@@ -412,6 +418,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
 
         if (startSecondtrip) {
+            counterToLevelUp = counterToLevelUp + 1;
             drawElement(background_low1);
             background_low1.updatePosition();
             if (background_low1.getX() <= -3f) {
@@ -422,6 +429,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                 background_low1.setX(1);
                 startSecondtrip = false;
                 starFirstdtrip = true;
+            }
+            //after 4 strips increase speed
+            if(counterToLevelUp ==4){
+                background_low0.setSpeed(0.008f);
+                background_low1.setSpeed(0.008f);
             }
         }
 
