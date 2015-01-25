@@ -37,5 +37,14 @@
         android:layout_height="match_parent"
         android:scaleType="fitXY"
         android:src="@drawable/credits" />
+    <ImageButton
+        android:id="@+id/credits_back_img"
+        android:layout_width="85dp"
+        android:layout_height="200dp"
+        android:layout_centerVertical="true"
+        android:onClick="goBack"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:src="@drawable/back_monster" />
 
 </RelativeLayout>

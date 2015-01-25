@@ -39,7 +39,7 @@
         android:id="@+id/fps_counter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="WHA DO WE DO NOW?" />
+        android:text="WHAT DO WE DO NOW?" />
 
 
 </RelativeLayout>

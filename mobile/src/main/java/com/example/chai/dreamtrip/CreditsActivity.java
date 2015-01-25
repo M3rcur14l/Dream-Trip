@@ -26,6 +26,11 @@ public class CreditsActivity extends Activity {
         ImageView blinkingStars2 = (ImageView) findViewById(R.id.blinking_stars_2);
         Animation blinkAnimation2 = AnimationUtils.loadAnimation(this, R.anim.blinking2);
         blinkingStars2.startAnimation(blinkAnimation2);
+
+    }
+
+    public void goBack(View v) {
+        this.finish();
     }
 
 }

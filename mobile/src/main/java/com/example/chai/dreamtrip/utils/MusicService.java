@@ -88,6 +88,7 @@ public class MusicService extends Service
 
     public void create() {
         mPlayer = MediaPlayer.create(this, R.raw.main_music);
+        mPlayer.setVolume(0.7f,0.7f);
         mPlayer.setOnErrorListener(this);
 
         mPlayer.setOnErrorListener(new OnErrorListener() {

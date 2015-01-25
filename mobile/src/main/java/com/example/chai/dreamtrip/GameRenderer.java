@@ -1,7 +1,9 @@
 package com.example.chai.dreamtrip;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
+import android.media.MediaPlayer;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
@@ -13,6 +15,7 @@ import com.example.chai.dreamtrip.model.Enemy;
 import com.example.chai.dreamtrip.model.GameObject;
 import com.example.chai.dreamtrip.opengl.TextureShaderProgram;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -38,6 +41,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     enum GameState {GAME_OVER, GAME_PAUSED, GAME_STARTED}
 
     private GameActivity context;
+
+    private MediaPlayer positiveStarPlayer;
+    private MediaPlayer negativeStarPlayer;
 
     private GameState state;
     private TextureShaderProgram textureProgram;
@@ -66,11 +72,10 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     //white stars
     //private int[] whiteStarsId = {R.drawable.star0, R.drawable.star1, R.drawable.star2, R.drawable.start3};
-   // private int[] whiteStarsId = {R.drawable.b_star0, R.drawable.b_star1, R.drawable.b_star2, R.drawable.b_star3};
-    private int[] whiteStarsId = {R.drawable.star_11, R.drawable.star_21, R.drawable.star_31, R.drawable.star_41,R.drawable.star_51};
+    // private int[] whiteStarsId = {R.drawable.b_star0, R.drawable.b_star1, R.drawable.b_star2, R.drawable.b_star3};
+    private int[] whiteStarsId = {R.drawable.star_11, R.drawable.star_21, R.drawable.star_31, R.drawable.star_41, R.drawable.star_51};
     //yellow star
     private int[] yellowStarsId = {R.drawable.star_1, R.drawable.star_2, R.drawable.star_3, R.drawable.star_4};
-
 
 
     //plazma
@@ -83,13 +88,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     //numbers
     private int[] numbersIds = {R.drawable.num0, R.drawable.num1, R.drawable.num2, R.drawable.num3, R.drawable.num4, R.drawable.num5, R.drawable.num6,
-            R.drawable.num7, R.drawable.num8, R.drawable.num9,R.drawable.dot};
+            R.drawable.num7, R.drawable.num8, R.drawable.num9, R.drawable.dot};
 
 
     private GameObject background_low0;
     private GameObject background_low1;
     private GameObject background_low2;
     private GameObject background_low3;
+
 
     private LinkedList<GameObject> timeBoard = new LinkedList<>();
     private GameObject number;
@@ -156,7 +162,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         textureProgram = new TextureShaderProgram(context);
 
         state = GameState.GAME_STARTED;
-        shipPosition = new MyPoint(-0.3f,-03f);
+        shipPosition = new MyPoint(-0.3f, -03f);
+        positiveStarPlayer = MediaPlayer.create(context, R.raw.positive_star);
+        negativeStarPlayer = MediaPlayer.create(context, R.raw.touch);
+        positiveStarPlayer.setVolume(1.0f,1.0f);
+        negativeStarPlayer.setVolume(1.0f,1.0f);
+
         //game elements
         background = new GameObject(context, -1, -1, 2, 2, R.drawable.sky_background);
         //ration w/h
@@ -164,7 +175,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         background_low1 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
         background_low0.setSpeed(0.002f);
         background_low1.setSpeed(0.002f);
-
 
 
         background_low2 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
@@ -197,8 +207,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         againButton = new GameObject(context, 0.125f, -0.375f, 0.25f, 0.25f, R.drawable.again_button);
         againButtonPressed = new GameObject(context, 0.125f, -0.375f, 0.25f, 0.25f, R.drawable.again_button_pressed);
 
-        backButton = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.back_button);
-        backButtonPressed = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.back_button_pressed);
+        backButton = new GameObject(context, -0.125f, -0.375f, 0.25f, 00.25f, R.drawable.back_button);
+        backButtonPressed = new GameObject(context, -0.125f, -0.375f, 0.25f, 0.25f, R.drawable.back_button_pressed);
 
         menuButton = new GameObject(context, -0.375f, -0.375f, 0.25f, 0.25f, R.drawable.menu_button);
         menuButtonPressed = new GameObject(context, -0.375f, -0.375f, 0.25f, 0.25f, R.drawable.menu_button_pressed);
@@ -207,6 +217,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         populateNumbers();
 
     }
+
     float startingNumber_posX = -0.5f;
     float startingNumber_posY = 0.7f;
     float numberWidth = 0.18f;
@@ -217,38 +228,39 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private GameObject number3;
     private GameObject number4;
     private GameObject divider;
-    public void populateNumbers(){
 
-        for (int i = 0; i< 11; i++){
-            number = new GameObject(context,startingNumber_posX,0.7f,numberWidth,numberHeight,numbersIds[i]);
+    public void populateNumbers() {
+
+        for (int i = 0; i < 11; i++) {
+            number = new GameObject(context, startingNumber_posX, 0.7f, numberWidth, numberHeight, numbersIds[i]);
             timeBoard.add(number);
         }
 
-        number1= timeBoard.get(0);  //-->0
+        number1 = timeBoard.get(0);  //-->0
         number1.setX(number1.getX() + numberWidth);
         number1.updatePosition();
 
-        number2= timeBoard.get(0);  //-->0
-        number2.setX(number2.getX() + 2*numberWidth);
+        number2 = timeBoard.get(0);  //-->0
+        number2.setX(number2.getX() + 2 * numberWidth);
         number2.updatePosition();
 
         divider = timeBoard.get(10); //-->:
-        divider.setX(divider.getX() + 3* numberWidth);
+        divider.setX(divider.getX() + 3 * numberWidth);
         divider.updatePosition();
 
-        number3= timeBoard.get(0);  //-->0
-        number3.setX(number3.getX() + 4*numberWidth);
+        number3 = timeBoard.get(0);  //-->0
+        number3.setX(number3.getX() + 4 * numberWidth);
         number3.updatePosition();
 
-        number4= timeBoard.get(0);  //-->0
-        number4.setX(number4.getX() + 5*numberWidth);
+        number4 = timeBoard.get(0);  //-->0
+        number4.setX(number4.getX() + 5 * numberWidth);
         number4.updatePosition();
 
     }
 
 
-    public void drawTimeBoard(){
-            drawElement(number1);
+    public void drawTimeBoard() {
+        drawElement(number1);
         drawElement(number2);
         drawElement(divider);
         drawElement(number3);
@@ -333,8 +345,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             drawLowBackgroundStrips();
             drawLowBackgroundStrips2();
 
-            drawTimeBoard();
-            if(level == 0) {
+            // drawTimeBoard();
+            if (level == 0) {
                 for (Iterator it = enemies.iterator(); it.hasNext(); ) {
                     Enemy en = (Enemy) it.next();
 
@@ -351,6 +363,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                             isBlinking = true;
                             gamePoint = gamePoint + 1;
 
+                            negativeStarPlayer.start();
+
                             float randValue = (float) (Math.random() * 10) / 10;
                             en.setX(1f + randValue);
                             if (gamePoint >= 8) {
@@ -365,7 +379,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                 }
             }
 
-            if(level == 1){
+            if (level == 1) {
                 for (Iterator it = enemies1.iterator(); it.hasNext(); ) {
                     Enemy en = (Enemy) it.next();
 
@@ -377,8 +391,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         float y = -0.25f + randY * 0.16666f;
                         en.setY(y);
                     }
-                        if (en.getY() <= -0.5f) en.changeYDirection();
-                        if (en.getY() >= 1f) en.changeYDirection();
+                    if (en.getY() <= -0.5f) en.changeYDirection();
+                    if (en.getY() >= 1f) en.changeYDirection();
 
 
                     if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
@@ -387,13 +401,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                     fire.setY(ship.getY() + ship.getHeight() / 2);*/
                             isBlinking = true;
                             gamePoint = gamePoint + 2;
-
+                            negativeStarPlayer.start();
                             float randValue = (float) (Math.random() * 10) / 10;
                             en.setX(1f + randValue);
                             if (gamePoint >= 8) {
                                 gamePoint = 8;
-
-
                             }
                         }
                     }
@@ -401,7 +413,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
                 }
             }
-            if(level == 2){
+            if (level == 2) {
                 for (Iterator it = enemies2.iterator(); it.hasNext(); ) {
                     Enemy en = (Enemy) it.next();
 
@@ -413,8 +425,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         float y = -0.25f + randY * 0.16666f;
                         en.setY(y);
                     }
-                        if (en.getY() <= -0.5f) en.changeYDirection();
-                        if (en.getY() >= 1f) en.changeYDirection();
+                    if (en.getY() <= -0.5f) en.changeYDirection();
+                    if (en.getY() >= 1f) en.changeYDirection();
 
 
                     if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
@@ -424,17 +436,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                             isBlinking = true;
                             gamePoint = gamePoint + 3;
 
+                            negativeStarPlayer.start();
+
                             float randValue = (float) (Math.random() * 10) / 10;
                             en.setX(1f + randValue);
                             if (gamePoint >= 8) {
                                 gamePoint = 8;
-
-
                             }
                         }
                     }
-
-
                 }
             }
 
@@ -445,9 +455,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                 if (en.getX() <= -1) {
                     en.setX(1f);
 
-                        float randY = (float) Math.random() * (6);
-                        float y = -0.25f + randY * 0.16666f;
-                        en.setY(y);
+                    float randY = (float) Math.random() * (6);
+                    float y = -0.25f + randY * 0.16666f;
+                    en.setY(y);
 
                 }
 
@@ -456,6 +466,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         float randValue = (float) (Math.random() * 10) / 10;
                         en.setX(1f + randValue);
                         gamePoint = gamePoint - 1;
+
+                        positiveStarPlayer.start();
+
                         context.sendMessage("/mydata", "VIBRATE");
                         if (gamePoint < 0) gamePoint = 0;
 
@@ -484,8 +497,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                     pastTimeToBlackHole = System.currentTimeMillis();
                     bucoNerissimo.setX(1f);
                     bucoNerissimo.setY(0f);
-                     float randX = (float)(Math.random() * 10)/10;
-                     bucoNerissimo.setY(randX);
+                    float randX = (float) (Math.random() * 10) / 10;
+                    bucoNerissimo.setY(randX);
                     bucoNerissimo.updatePosition();
 
                 }
@@ -513,16 +526,46 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         } else if (state == GameState.GAME_PAUSED) {
             //handle game pause state
             drawElement(sfondoGamePaused);
-            drawElement(backButton);
-            drawElement(menuButton);
-            drawElement(againButton);
+            if (touchpresssed) {
+                drawElement(backButtonPressed);
+            } else {
+                drawElement(backButton);
+            }
+            if (touchAgain) {
+                drawElement(againButtonPressed);
+            } else {
+                drawElement(againButton);
+            }
+            if (touchMenu) {
+                drawElement(menuButtonPressed);
+            } else {
+                drawElement(menuButton);
+            }
         } else if (state == GameState.GAME_OVER) {
             //handle game over state
             drawElement(sfondoGameOver);
-            drawElement(menuButton);
-            drawElement(againButton);
+            /*
+            *    touchBack = false;
+        touchAgain = false;
+        touchMenu = false;*/
+            if (touchpresssed) {
+                drawElement(backButtonPressed);
+            } else {
+                drawElement(backButton);
+            }
+            if (touchAgain) {
+                drawElement(againButtonPressed);
+            } else {
+                drawElement(againButton);
+            }
+            if (touchMenu) {
+                drawElement(menuButtonPressed);
+            } else {
+                drawElement(menuButton);
+            }
         }
     }
+
 
     long deltaBlink = 200;
     long lastBlink = 0;
@@ -638,8 +681,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                 background_low3.setSpeed(0.004f);
                 //default speed = 0.005f
                 Enemy.setSpeed(0.006f);
-                level = level+1;
-                if(level == 2){
+                level = level + 1;
+                if (level == 2) {
                     level = 2;
 
                 }
@@ -805,16 +848,41 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
     boolean touchpresssed = false;
+
     public void handleTouchPress(float normalizedX, float normalizedY) {
-        if(intersect(new MyPoint(normalizedX, normalizedY), new Square(ship.getX(), ship.getY(), ship.getWidth(), ship.getHeight()))){
+        if (intersect(new MyPoint(normalizedX, normalizedY), new Square(ship.getX(), ship.getY(), ship.getWidth(), ship.getHeight()))) {
             touchpresssed = true;
         }
-
+        if (state == GameState.GAME_OVER) {
+            //intersection with backButton (whenever it is i hope :P)
+            if (intersect(new MyPoint(normalizedX, normalizedY), new Square(backButton.getX(), backButton.getY(), backButton.getWidth(), backButton.getHeight()))) {
+                //clicked on back
+                touchBack = true;
+                ((Activity) context).finish();
+            }
+            if (intersect(new MyPoint(normalizedX, normalizedY), new Square(menuButton.getX(), menuButton.getY(), menuButton.getWidth(), menuButton.getHeight()))) {
+                //clicked on back
+                touchMenu = true;
+                ((Activity) context).finish();
+            }
+            if (intersect(new MyPoint(normalizedX, normalizedY), new Square(againButton.getX(), againButton.getY(), againButton.getWidth(), againButton.getHeight()))) {
+                //clicked on back
+                touchAgain = true;
+                level = 0;
+                state = GameState.GAME_STARTED;
+                gamePoint = 0;
+            }
+        }
 
     }
 
+    boolean touchBack = false;
+    boolean touchAgain = false;
+    boolean touchMenu = false;
+
+
     public void handleTouchDrag(float normalizedX, float normalizedY) {
-        if(touchpresssed){
+        if (touchpresssed) {
 
             shipPosition = new MyPoint(normalizedX, normalizedY);
             //ship.updatePosition(normalizedX, normalizedY);
@@ -824,21 +892,25 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     public void handleTouchUp(float normalizedX, float normalizedY) {
         touchpresssed = false;
+        touchBack = false;
+        touchAgain = false;
+        touchMenu = false;
     }
 
-    public boolean intersect(MyPoint p, Square q){
-    if(p.pointX > q.pointX && p.pointX < q.pointX+q.width && p.pointY > q.pointY && p.pointY < q.pointY+q.height) return true;
+    public boolean intersect(MyPoint p, Square q) {
+        if (p.pointX > q.pointX && p.pointX < q.pointX + q.width && p.pointY > q.pointY && p.pointY < q.pointY + q.height)
+            return true;
 
         return false;
     }
 
-    public class Square{
+    public class Square {
         float pointX;
         float pointY;
         float width;
         float height;
 
-        public Square(float x, float y, float width, float height){
+        public Square(float x, float y, float width, float height) {
             pointX = x;
             pointY = y;
             this.width = width;
@@ -846,10 +918,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         }
     }
-    public class MyPoint{
+
+    public class MyPoint {
         float pointX;
         float pointY;
-        public MyPoint(float x, float y){
+
+        public MyPoint(float x, float y) {
             pointX = x;
             pointY = y;
         }
