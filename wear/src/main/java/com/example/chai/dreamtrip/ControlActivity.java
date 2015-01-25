@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -19,7 +20,7 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
 
     private static final String DATA_ITEM = "/mydata";
 
-    private Button restartButton;
+    private Button playButton, pauseButton;
     private SensorManager mSensorManager;
     private Sensor accelerometer;
 
@@ -37,16 +38,43 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                restartButton = (Button) stub.findViewById(R.id.start_btn);
-                restartButton.setText("RESTART");
-                restartButton.setOnClickListener(new View.OnClickListener() {
+                pauseButton = (Button) stub.findViewById(R.id.pause_btn);
+                pauseButton.setOnTouchListener(new View.OnTouchListener() {
+                       @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            pauseButton.setBackground(getResources().getDrawable(R.drawable.pause_pressed));
+                            return true;
+                        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                            pauseButton.setBackground(getResources().getDrawable(R.drawable.pause));
+                            pauseButton.setVisibility(View.GONE);
+                            playButton.setVisibility(View.VISIBLE);
+                            return true;
+                        } else
+                            return false;
+                    }
+                });
+
+                playButton = (Button) stub.findViewById(R.id.play_btn);
+                playButton.setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        restart();
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            playButton.setBackground(getResources().getDrawable(R.drawable.play_pressed));
+                            return true;
+                        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                            playButton.setBackground(getResources().getDrawable(R.drawable.play));
+                            playButton.setVisibility(View.GONE);
+                            pauseButton.setVisibility(View.VISIBLE);
+                            return true;
+                        } else
+                            return false;
                     }
                 });
             }
         });
+
+
 
         initGoogleApiClient();
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -126,9 +154,5 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
     public void onDestroy() {
         super.onDestroy();
         mApiClient.disconnect();
-    }
-
-    public void restart() {
-        recreate();
     }
 }
