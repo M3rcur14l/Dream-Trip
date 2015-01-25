@@ -16,8 +16,6 @@ import com.example.chai.dreamtrip.opengl.TextureShaderProgram;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -58,19 +56,26 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private int[] fireredResId = {R.drawable.fire0, R.drawable.fire1, R.drawable.fire2, R.drawable.fire3};
 
     //white stars
-    private int[] whiteStarsId = {R.drawable.star0, R.drawable.star1, R.drawable.star2, R.drawable.start3};
-
+    //private int[] whiteStarsId = {R.drawable.star0, R.drawable.star1, R.drawable.star2, R.drawable.start3};
+    private int[] whiteStarsId = {R.drawable.b_star0, R.drawable.b_star1, R.drawable.b_star2, R.drawable.b_star3};
     //yellow star
     private int[] yellowStarsId = {R.drawable.star_1, R.drawable.star_2, R.drawable.star_3, R.drawable.star_4};
 
     //plazma
     private int[] plasmaIds = {R.drawable.plazma0, R.drawable.plazma1, R.drawable.plazma2, R.drawable.plazma3, R.drawable.plazma5, R.drawable.plazma6, R.drawable.plazma7,
             R.drawable.plazma8, R.drawable.plazma9};
+/*
+    //monsters
+    private int[] monsterIds = {R.drawable.monster1, R.drawable.monster2, R.drawable.monster3, R.drawable.monster4, R.drawable.monster5, R.drawable.monster6, R.drawable.monster7,
+    R.drawable.monster8, R.drawable.monster9};*/
+
 
     private GameObject background_low0;
     private GameObject background_low1;
     private GameObject background_low2;
     private GameObject background_low3;
+    private GameObject lifeBar;
+
     private ArrayList<GameObject> backgroundStripList = new ArrayList<>();
     private GameObject background;
 
@@ -83,6 +88,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private float unitX;
     private float unitY;
     private float normalize;
+
+
 
     public GameRenderer(Context c) {
         context = c;
@@ -126,14 +133,16 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         launchYellowStars();
 
+
+        lifeBar = new GameObject(context,-1f,0.75f,0.5f,0.25f,R.drawable.life_bar);
         ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
-        fire = new Enemy(context, 0f, 0f, 0.18f, 0.2f, R.drawable.fire0);
+        //fire = new Enemy(context, 0f, 0f, 0.18f, 0.2f, R.drawable.fire0);
         bucoNerissimo = new GameObject(context, 1f, 0f, 0.2f, 0.22f, plasmaIds);
 
     }
 
     public void launchYellowStars() {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 5; i++) {
             float y = -0.3f + i * 0.16666f;
             float randY = (float) Math.random() * (6);
             float x = 1f + 0.3f * randY;
@@ -193,10 +202,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             en.updatePosition();
             if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
                 if (en.getY() > ship.getY() && en.getY() < (ship.getY() + ship.getHeight()) || en.getY() + en.getHeight() > ship.getY() && (en.getY() + en.getHeight()) < ship.getY()) {
-                    fire.setX(ship.getX() + ship.getWidth() / 2);
-                    fire.setY(ship.getY() + ship.getHeight() / 2);
-                    showFire = true;
-                    pastTimeToFire = System.currentTimeMillis();
+                    /*fire.setX(ship.getX() + ship.getWidth() / 2);
+                    fire.setY(ship.getY() + ship.getHeight() / 2);*/
+                    isBlinking = true;
                 }
             }
 
@@ -243,25 +251,78 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
         //expleoosion
-        if (showFire) {
-            if ((System.currentTimeMillis() - pastTimeToFire) <= deltaTimeToFire) {
-                fire.updatePosition();
-                drawElement(fire);
-                showFire = false;
-            }
-
+        if (isBlinking) {
+            shipBlickAnimationStart();
+        }else{
+            drawElement(ship);
         }
 
-        drawElement(ship);
 
+
+       // drawElement(ship);
+
+        if(initializeBlackHole) {
+            pastTimeToBlackHole = System.currentTimeMillis();
+            initializeBlackHole = false;
+        }
+        if(!showBlackHole) {
+            if (System.currentTimeMillis() - pastTimeToBlackHole > deltaTimeToBlackHole) {
+                showBlackHole = true;
+                pastTimeToBlackHole = System.currentTimeMillis();
+                bucoNerissimo.setX(1f);
+                bucoNerissimo.setY(0f);
+                bucoNerissimo.updatePosition();
+
+            }
+        }
+
+
+
+
+
+        if(showBlackHole){
+            bucoNerissimo.updatePosition();
+            drawElement(bucoNerissimo);
+            if(System.currentTimeMillis() - pastTimeToBlackHole > 2000 ){
+                showBlackHole = false;
+                initializeBlackHole = true;
+            }
+        }
+
+        drawElement(lifeBar);
 
     }
 
-    private boolean removeStar = false;
-    private Enemy enToRemove;
-    long deltaTimeToFire = 500;
-    long pastTimeToFire = 0;
-    boolean showFire = false;
+    long deltaBlink = 200;
+    long lastBlink = 0;
+    int countBlink = 0;
+    int MAX_BLINK = 3;
+    boolean starBlink = true;
+
+    public void shipBlickAnimationStart(){
+
+        if(starBlink){
+            lastBlink = System.currentTimeMillis();
+            starBlink = false;
+        }
+        if(System.currentTimeMillis()- lastBlink > deltaBlink && countBlink < MAX_BLINK){
+            drawElement(ship);
+            lastBlink = System.currentTimeMillis();
+            countBlink ++;
+        }
+        if(countBlink == MAX_BLINK){
+         isBlinking = false;
+            return;
+        }
+
+    }
+
+
+    long deltaTimeToBlackHole = 8000;
+    long pastTimeToBlackHole = 0;
+    boolean initializeBlackHole = true;
+    boolean showBlackHole = false;
+    boolean isBlinking = false;
 
 
     int level = 0;
