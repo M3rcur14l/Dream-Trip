@@ -732,6 +732,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    public GameState getState() {
+        return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
+    }
 }
 
 

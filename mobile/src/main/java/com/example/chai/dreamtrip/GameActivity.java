@@ -98,10 +98,19 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
             @Override
             public void onReceive(Context context, Intent intent) {
                 String result = intent.getStringExtra("MESSAGE");
-                String values[] = result.split(",");
-                float x = Float.parseFloat(values[1]);
-                float y = Float.parseFloat(values[0]);
-                requestUpdateToRenderer(x / 40, y / 25);
+                if (result.equals("PAUSE"))
+                    mySurfaceView.queueEvent(new Runnable() {
+                        @Override
+                        public void run() {
+                            myRenderer.setState(GameRenderer.GameState.GAME_PAUSED);
+                        }
+                    });
+                else {
+                    String values[] = result.split(",");
+                    float x = Float.parseFloat(values[1]);
+                    float y = Float.parseFloat(values[0]);
+                    requestUpdateToRenderer(x / 40, y / 25);
+                }
             }
         };
 
