@@ -48,6 +48,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private int screenWidth;
     private int screenHeight;
 
+    private int counterToLevelUp = 0;
+
     //GameObject for the game
     private GameObject ship;
     private int[] shipsResId = {R.drawable.ship_0, R.drawable.ship_1, R.drawable.ship_2, R.drawable.ship_3, R.drawable.ship_4};
@@ -58,12 +60,25 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     //white stars
     private int[] whiteStarsId = {R.drawable.star0, R.drawable.star1, R.drawable.star2, R.drawable.start3};
 
+    //yellow star
+    private int[] yellowStarsId = {R.drawable.star_1, R.drawable.star_2, R.drawable.star_3, R.drawable.star_4};
+
+    //plazma
+    private int[] plasmaIds = {R.drawable.plazma0, R.drawable.plazma1, R.drawable.plazma2, R.drawable.plazma3, R.drawable.plazma5, R.drawable.plazma6, R.drawable.plazma7,
+            R.drawable.plazma8, R.drawable.plazma9};
+
     private GameObject background_low0;
     private GameObject background_low1;
     private GameObject background_low2;
     private GameObject background_low3;
     private ArrayList<GameObject> backgroundStripList = new ArrayList<>();
     private GameObject background;
+
+    private GameObject bucoNerissimo;
+
+    private Enemy single_yellow_star;
+
+    private List<Enemy> yellowStars = new LinkedList<>();
 
     private float unitX;
     private float unitY;
@@ -86,6 +101,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     Enemy enemy;
     Enemy fire;
 
+    private int gamePoint = 0;
+
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -107,10 +124,25 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         launchStars();
 
+        launchYellowStars();
+
         ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
-        fire = new Enemy(context, 0f, 0f, 0.10f, 0.15f,R.drawable.fire0 );
+        fire = new Enemy(context, 0f, 0f, 0.18f, 0.2f, R.drawable.fire0);
+        bucoNerissimo = new GameObject(context, 1f, 0f, 0.2f, 0.22f, plasmaIds);
 
     }
+
+    public void launchYellowStars() {
+        for (int i = 0; i < 7; i++) {
+            float y = -0.3f + i * 0.16666f;
+            float randY = (float) Math.random() * (6);
+            float x = 1f + 0.3f * randY;
+            single_yellow_star = new Enemy(context, x, y, 0.10f, 0.15f, yellowStarsId);
+            single_yellow_star.setLineaMovement(true);
+            yellowStars.add(single_yellow_star);
+        }
+    }
+
 
     public void launchStars() {
         for (int i = 0; i < 7; i++) {
@@ -124,11 +156,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     }
 
     public void launchFireEnemies() {
+        //rinizialize the
+        enemies = null;
+        enemies = new LinkedList<>();
         for (int i = 0; i < 6; i++) {
             float y = -0.25f + i * 0.16666f;
-            float randY = (float) Math.random() * (10);
-            float x = 1f + 0.15f * randY;
-            enemy = new Enemy(context, x, y, 0.15f, 0.16f, fireredResId);
+            float randY = (float) Math.random() * (6);
+            float x = 1f + 0.4f * randY;
+            enemy = new Enemy(context, x, y, 0.10f, 0.15f, fireredResId);
             int randomDirection = (int) (Math.random() * (10));
             if (randomDirection >= 5) enemy.changeYDirection();
             enemies.add(enemy);
@@ -156,21 +191,17 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         for (Enemy en : enemies) {
             drawElement(en);
             en.updatePosition();
-
-            //collision
-            if(ship.getX()+ship.getWidth() > en.getX() && (ship.getX()+ship.getWidth())<(en.getX()+en.getWidth())){
-                if(ship.getY() + ship.getHeight() > en.getY() && (ship.getY()+ship.getHeight())<(en.getY()+en.getHeight())){
-                    fire.setX(ship.getX());
-                    fire.setY(ship.getY());
+            if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
+                if (en.getY() > ship.getY() && en.getY() < (ship.getY() + ship.getHeight()) || en.getY() + en.getHeight() > ship.getY() && (en.getY() + en.getHeight()) < ship.getY()) {
+                    fire.setX(ship.getX() + ship.getWidth() / 2);
+                    fire.setY(ship.getY() + ship.getHeight() / 2);
                     showFire = true;
                     pastTimeToFire = System.currentTimeMillis();
                 }
-
             }
 
             if (en.getX() <= -1) {
                 en.setX(1f);
-
                 if (level == 0) {
                     float randY = (float) Math.random() * (6);
                     float y = -0.25f + randY * 0.16666f;
@@ -184,25 +215,54 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         }
 
-        if(showFire) {
-            if((System.currentTimeMillis() - pastTimeToFire )<= deltaTimeToFire){
-                drawFire();
+        //yellow stars
+        for (Enemy en : yellowStars) {
+            drawElement(en);
+            en.updatePosition();
+            if (en.getX() <= -1) {
+                en.setX(1f);
+                if (level == 0) {
+                    float randY = (float) Math.random() * (6);
+                    float y = -0.25f + randY * 0.16666f;
+                    en.setY(y);
+                } else if (level == 2) {
+                    if (en.getY() <= -0.25f) en.changeYDirection();
+                    if (en.getY() >= 1f) en.changeYDirection();
+                }
+            }
+
+            if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
+                if (en.getY() > ship.getY() && en.getY() < (ship.getY() + ship.getHeight()) || en.getY() + en.getHeight() > ship.getY() && (en.getY() + en.getHeight()) < ship.getY()) {
+                    float randValue = (float) (Math.random() * 10) / 10;
+                    en.setX(1f + randValue);
+                    gamePoint = gamePoint + 1;
+
+                }
+            }
+        }
+
+
+        //expleoosion
+        if (showFire) {
+            if ((System.currentTimeMillis() - pastTimeToFire) <= deltaTimeToFire) {
+                fire.updatePosition();
+                drawElement(fire);
                 showFire = false;
             }
 
         }
+
         drawElement(ship);
 
 
     }
 
+    private boolean removeStar = false;
+    private Enemy enToRemove;
     long deltaTimeToFire = 500;
     long pastTimeToFire = 0;
-boolean showFire = false;
+    boolean showFire = false;
 
-    public void drawFire(){
-        drawElement(fire);
-    }
 
     int level = 0;
     boolean startSecondtrip = false;
@@ -272,7 +332,11 @@ boolean showFire = false;
                 background_low3.setX(1);
                 startSecondtrip2 = false;
                 starFirstdtrip2 = true;
+                //end of strips
+                counterToLevelUp = counterToLevelUp + 1;
+
             }
+
         }
 
 

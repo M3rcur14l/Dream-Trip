@@ -107,6 +107,8 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
         ImageView blinkingStars2 = (ImageView) findViewById(R.id.blinking_stars_2);
         Animation blinkAnimation2 = AnimationUtils.loadAnimation(this, R.anim.blinking2);
         blinkingStars2.startAnimation(blinkAnimation2);
+
+
         mySurfaceView = (GLSurfaceView) findViewById(R.id.gameView);
         mySurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         mySurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
