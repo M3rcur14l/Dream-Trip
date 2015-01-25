@@ -31,7 +31,7 @@ public class Enemy {
     private float Width;
     private float Height;
 
-    private float speed = 0.005f;
+    private static float  speed = 0.005f;
     private int resId;
     int[] resIDs;
     private int numberOfFrames = 0;
@@ -287,9 +287,12 @@ public class Enemy {
         return speed;
     }
 
-    public void setSpeed(float speed) {
-        this.speed = speed;
+    public static void setSpeed(float speed) {
+        speed = speed;
     }
+
+
+
 
 
 }

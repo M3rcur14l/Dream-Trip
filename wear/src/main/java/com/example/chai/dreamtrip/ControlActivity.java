@@ -49,6 +49,7 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
                             pauseButton.setBackground(getResources().getDrawable(R.drawable.pause));
                             pauseButton.setVisibility(View.GONE);
                             playButton.setVisibility(View.VISIBLE);
+                            sendMessage(DATA_ITEM, "PAUSE");
                             return true;
                         } else
                             return false;
@@ -66,6 +67,7 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
                             playButton.setBackground(getResources().getDrawable(R.drawable.play));
                             playButton.setVisibility(View.GONE);
                             pauseButton.setVisibility(View.VISIBLE);
+                            sendMessage(DATA_ITEM, "PLAY");
                             return true;
                         } else
                             return false;
@@ -73,8 +75,6 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
                 });
             }
         });
-
-
 
         initGoogleApiClient();
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);

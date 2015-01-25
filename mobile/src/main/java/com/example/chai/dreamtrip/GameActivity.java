@@ -28,10 +28,8 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
 
     private GLSurfaceView mySurfaceView;
     private GameRenderer myRenderer;
-
     private GoogleApiClient mApiClient;
     private BroadcastReceiver receiver;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
