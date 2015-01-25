@@ -129,9 +129,6 @@ public class StartActivity extends Activity implements ServiceConnection {
                     Bitmap bm = BitmapUtils.getBitmap("img/options.png", StartActivity.this);
                     bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
                     options.setImageBitmap(bm);
-
-                    mServ.start();
-
                     return true;
                 } else
                     return false;
@@ -155,6 +152,7 @@ public class StartActivity extends Activity implements ServiceConnection {
                     Bitmap bm = BitmapUtils.getBitmap("img/credits.png", StartActivity.this);
                     bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
                     credits.setImageBitmap(bm);
+                    startActivity(new Intent(StartActivity.this, CreditsActivity.class));
                     return true;
                 } else
                     return false;
