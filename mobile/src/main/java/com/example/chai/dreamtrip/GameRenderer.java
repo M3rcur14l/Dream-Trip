@@ -12,6 +12,7 @@ import android.view.WindowManager;
 import com.example.chai.dreamtrip.model.Enemy;
 import com.example.chai.dreamtrip.model.GameObject;
 import com.example.chai.dreamtrip.opengl.TextureShaderProgram;
+import com.google.android.gms.games.Game;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -33,7 +34,13 @@ import static android.opengl.Matrix.orthoM;
  */
 public class GameRenderer implements GLSurfaceView.Renderer {
 
+    enum GameState {GAME_OVER, GAME_PAUSED, GAME_STARTED}
+
+    ;
+
     Context context;
+
+    private GameState state;
     private TextureShaderProgram textureProgram;
 
 
@@ -64,16 +71,21 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     //plazma
     private int[] plasmaIds = {R.drawable.plazma0, R.drawable.plazma1, R.drawable.plazma2, R.drawable.plazma3, R.drawable.plazma5, R.drawable.plazma6, R.drawable.plazma7,
             R.drawable.plazma8, R.drawable.plazma9};
-/*
+
     //monsters
     private int[] monsterIds = {R.drawable.monster1, R.drawable.monster2, R.drawable.monster3, R.drawable.monster4, R.drawable.monster5, R.drawable.monster6, R.drawable.monster7,
-    R.drawable.monster8, R.drawable.monster9};*/
+            R.drawable.monster8, R.drawable.monster9};
 
 
     private GameObject background_low0;
     private GameObject background_low1;
     private GameObject background_low2;
     private GameObject background_low3;
+
+    //monster
+    private LinkedList<GameObject> monsterList = new LinkedList<>();
+    private GameObject monster;
+    //life bar
     private GameObject lifeBar;
 
     private ArrayList<GameObject> backgroundStripList = new ArrayList<>();
@@ -88,7 +100,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private float unitX;
     private float unitY;
     private float normalize;
-
 
 
     public GameRenderer(Context c) {
@@ -110,12 +121,23 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     private int gamePoint = 0;
 
+    private GameObject sfondoGameOver;
+    private GameObject sfondoGamePaused;
+    private GameObject backButton;
+    private GameObject againButton;
+    private GameObject menuButton;
+    private GameObject againButtonPressed;
+    private GameObject backButtonPressed;
+    private GameObject menuButtonPressed;
+
+
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         //load the program
         textureProgram = new TextureShaderProgram(context);
 
+        state = GameState.GAME_STARTED;
 
         //game elements
         background = new GameObject(context, -1, -1, 2, 2, R.drawable.sky_background);
@@ -129,16 +151,42 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         background_low2 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
         background_low3 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
 
-        launchStars();
+        if (level == 0)
+            launchStars();
+        if (level == 1)
+            launchFireEnemies();
 
         launchYellowStars();
 
 
-        lifeBar = new GameObject(context,-1f,0.75f,0.5f,0.25f,R.drawable.life_bar);
+        lifeBar = new GameObject(context, -1f, 0.75f, 0.5f, 0.25f, R.drawable.life_bar);
+        populateMonsters();
+
         ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
         //fire = new Enemy(context, 0f, 0f, 0.18f, 0.2f, R.drawable.fire0);
         bucoNerissimo = new GameObject(context, 1f, 0f, 0.2f, 0.22f, plasmaIds);
 
+
+        //items for game screen : GAME_OVER and GAME_PAUSED
+        sfondoGameOver = new GameObject(context, -1f, -1f, 2f, 2f, R.drawable.game_over);
+        sfondoGamePaused = new GameObject(context, -1f, -1f, 2f, 2f, R.drawable.back_paused);
+
+        againButton = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.again_button);
+        againButtonPressed = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.again_button_pressed);
+
+        backButton = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.back_button);
+        backButtonPressed = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.back_button_pressed);
+
+        menuButton = new GameObject(context, 0.25f, 0.25f, 0.5f, 0.5f, R.drawable.menu_button);
+        menuButtonPressed = new GameObject(context, 0.25f, 0.25f, 0.5f, 0.5f, R.drawable.menu_button_pressed);
+
+    }
+
+    public void populateMonsters() {
+        for (int i = 0; i < monsterIds.length; i++) {
+            monster = new GameObject(context, -1f, 0.75f, 0.5f, 0.25f, monsterIds[i]);
+            monsterList.add(monster);
+        }
     }
 
     public void launchYellowStars() {
@@ -173,6 +221,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             float randY = (float) Math.random() * (6);
             float x = 1f + 0.4f * randY;
             enemy = new Enemy(context, x, y, 0.10f, 0.15f, fireredResId);
+            enemy.setLineaMovement(false);
             int randomDirection = (int) (Math.random() * (10));
             if (randomDirection >= 5) enemy.changeYDirection();
             enemies.add(enemy);
@@ -193,104 +242,120 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         /*first method to call*/
         initDrawingSetting();
 
-        drawLowBackgroundStrips();
-        drawLowBackgroundStrips2();
+        if (state == GameState.GAME_STARTED) {
+            drawLowBackgroundStrips();
+            drawLowBackgroundStrips2();
 
 
-        for (Enemy en : enemies) {
-            drawElement(en);
-            en.updatePosition();
-            if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
-                if (en.getY() > ship.getY() && en.getY() < (ship.getY() + ship.getHeight()) || en.getY() + en.getHeight() > ship.getY() && (en.getY() + en.getHeight()) < ship.getY()) {
+            for (Enemy en : enemies) {
+                drawElement(en);
+                en.updatePosition();
+                if (en.getX() <= -1)
+                    en.setX(1f);
+
+                //for level 1
+                if (level == 1) {
+                    if (en.getY() <= -0.25f) en.changeYDirection();
+                    if (en.getY() >= 1f) en.changeYDirection();
+                }
+
+                if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
+                    if (en.getY() > ship.getY() && en.getY() < (ship.getY() + ship.getHeight()) || en.getY() + en.getHeight() > ship.getY() && (en.getY() + en.getHeight()) < ship.getY()) {
                     /*fire.setX(ship.getX() + ship.getWidth() / 2);
                     fire.setY(ship.getY() + ship.getHeight() / 2);*/
-                    isBlinking = true;
+                        isBlinking = true;
+                        gamePoint = gamePoint + 1;
+                        if (gamePoint >= 8) {
+                            gamePoint = 8;
+                            state = GameState.GAME_OVER;
+                            return;
+                        }
+                    }
+                }
+
+
+            }
+
+            //yellow stars
+            for (Enemy en : yellowStars) {
+                drawElement(en);
+                en.updatePosition();
+                if (en.getX() <= -1) {
+                    en.setX(1f);
+                    if (level == 0) {
+                        float randY = (float) Math.random() * (6);
+                        float y = -0.25f + randY * 0.16666f;
+                        en.setY(y);
+                    } else if (level == 1) {
+                        if (en.getY() <= -0.25f) en.changeYDirection();
+                        if (en.getY() >= 1f) en.changeYDirection();
+                    }
+                }
+
+                if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
+                    if (en.getY() > ship.getY() && en.getY() < (ship.getY() + ship.getHeight()) || en.getY() + en.getHeight() > ship.getY() && (en.getY() + en.getHeight()) < ship.getY()) {
+                        float randValue = (float) (Math.random() * 10) / 10;
+                        en.setX(1f + randValue);
+                        gamePoint = gamePoint - 1;
+                        if (gamePoint < 0) gamePoint = 0;
+
+                    }
                 }
             }
 
-            if (en.getX() <= -1) {
-                en.setX(1f);
-                if (level == 0) {
-                    float randY = (float) Math.random() * (6);
-                    float y = -0.25f + randY * 0.16666f;
-                    en.setY(y);
-                } else if (level == 2) {
-                    if (en.getY() <= -0.25f) en.changeYDirection();
-                    if (en.getY() >= 1f) en.changeYDirection();
-                }
+
+            //expleoosion
+            if (isBlinking) {
+                shipBlickAnimationStart();
+            } else {
+                drawElement(ship);
             }
 
 
-        }
+            // drawElement(ship);
 
-        //yellow stars
-        for (Enemy en : yellowStars) {
-            drawElement(en);
-            en.updatePosition();
-            if (en.getX() <= -1) {
-                en.setX(1f);
-                if (level == 0) {
-                    float randY = (float) Math.random() * (6);
-                    float y = -0.25f + randY * 0.16666f;
-                    en.setY(y);
-                } else if (level == 2) {
-                    if (en.getY() <= -0.25f) en.changeYDirection();
-                    if (en.getY() >= 1f) en.changeYDirection();
-                }
-            }
-
-            if (((en.getX() < (ship.getX() + ship.getWidth())) && (en.getX() > ship.getX())) || ((en.getX() + en.getWidth()) > ship.getX() && (en.getX() + en.getWidth()) < ship.getX())) {
-                if (en.getY() > ship.getY() && en.getY() < (ship.getY() + ship.getHeight()) || en.getY() + en.getHeight() > ship.getY() && (en.getY() + en.getHeight()) < ship.getY()) {
-                    float randValue = (float) (Math.random() * 10) / 10;
-                    en.setX(1f + randValue);
-                    gamePoint = gamePoint + 1;
-
-                }
-            }
-        }
-
-
-        //expleoosion
-        if (isBlinking) {
-            shipBlickAnimationStart();
-        }else{
-            drawElement(ship);
-        }
-
-
-
-       // drawElement(ship);
-
-        if(initializeBlackHole) {
-            pastTimeToBlackHole = System.currentTimeMillis();
-            initializeBlackHole = false;
-        }
-        if(!showBlackHole) {
-            if (System.currentTimeMillis() - pastTimeToBlackHole > deltaTimeToBlackHole) {
-                showBlackHole = true;
+            if (initializeBlackHole) {
                 pastTimeToBlackHole = System.currentTimeMillis();
-                bucoNerissimo.setX(1f);
-                bucoNerissimo.setY(0f);
+                initializeBlackHole = false;
+            }
+            if (!showBlackHole) {
+                if (System.currentTimeMillis() - pastTimeToBlackHole > deltaTimeToBlackHole) {
+                    showBlackHole = true;
+                    pastTimeToBlackHole = System.currentTimeMillis();
+                    bucoNerissimo.setX(1f);
+                    bucoNerissimo.setY(0f);
+                    bucoNerissimo.updatePosition();
+
+                }
+            }
+
+
+            if (showBlackHole) {
                 bucoNerissimo.updatePosition();
-
+                drawElement(bucoNerissimo);
+                if (System.currentTimeMillis() - pastTimeToBlackHole > 2000) {
+                    showBlackHole = false;
+                    initializeBlackHole = true;
+                }
             }
-        }
 
+            drawElement(lifeBar);
 
-
-
-
-        if(showBlackHole){
-            bucoNerissimo.updatePosition();
-            drawElement(bucoNerissimo);
-            if(System.currentTimeMillis() - pastTimeToBlackHole > 2000 ){
-                showBlackHole = false;
-                initializeBlackHole = true;
+            for (int j = 0; j <= gamePoint; j++) {
+                drawElement(monsterList.get(j));
             }
+
+        } else if (state == GameState.GAME_PAUSED) {
+            //handle game pause state
+            drawElement(sfondoGamePaused);
+            drawElement(backButton);
+            drawElement(menuButton);
+            drawElement(againButton);
+        } else if (state == GameState.GAME_OVER) {
+            //handle game over state
+            drawElement(sfondoGameOver);
+            drawElement(againButton);
         }
-
-        drawElement(lifeBar);
-
     }
 
     long deltaBlink = 200;
@@ -299,19 +364,19 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     int MAX_BLINK = 3;
     boolean starBlink = true;
 
-    public void shipBlickAnimationStart(){
+    public void shipBlickAnimationStart() {
 
-        if(starBlink){
+        if (starBlink) {
             lastBlink = System.currentTimeMillis();
             starBlink = false;
         }
-        if(System.currentTimeMillis()- lastBlink > deltaBlink && countBlink < MAX_BLINK){
+        if (System.currentTimeMillis() - lastBlink > deltaBlink && countBlink < MAX_BLINK) {
             drawElement(ship);
             lastBlink = System.currentTimeMillis();
-            countBlink ++;
+            countBlink++;
         }
-        if(countBlink == MAX_BLINK){
-         isBlinking = false;
+        if (countBlink == MAX_BLINK) {
+            isBlinking = false;
             return;
         }
 

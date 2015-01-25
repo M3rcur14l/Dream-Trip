@@ -139,8 +139,9 @@ public class Enemy {
 
     boolean moveLinearly = false;
     public void setLineaMovement(boolean b){
-        moveLinearly = true;
+        moveLinearly = b;
     }
+
     public void updatePosition() {
         float newX = getX() - speed;
         setX(newX);
