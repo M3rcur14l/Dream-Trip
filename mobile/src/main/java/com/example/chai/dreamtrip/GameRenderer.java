@@ -12,9 +12,9 @@ import android.view.WindowManager;
 import com.example.chai.dreamtrip.model.Enemy;
 import com.example.chai.dreamtrip.model.GameObject;
 import com.example.chai.dreamtrip.opengl.TextureShaderProgram;
-import com.google.android.gms.games.Game;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,9 +66,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     //white stars
     //private int[] whiteStarsId = {R.drawable.star0, R.drawable.star1, R.drawable.star2, R.drawable.start3};
-    private int[] whiteStarsId = {R.drawable.b_star0, R.drawable.b_star1, R.drawable.b_star2, R.drawable.b_star3};
+   // private int[] whiteStarsId = {R.drawable.b_star0, R.drawable.b_star1, R.drawable.b_star2, R.drawable.b_star3};
+    private int[] whiteStarsId = {R.drawable.star_11, R.drawable.star_21, R.drawable.star_31, R.drawable.star_41,R.drawable.star_51};
     //yellow star
     private int[] yellowStarsId = {R.drawable.star_1, R.drawable.star_2, R.drawable.star_3, R.drawable.star_4};
+
+
 
     //plazma
     private int[] plasmaIds = {R.drawable.plazma0, R.drawable.plazma1, R.drawable.plazma2, R.drawable.plazma3, R.drawable.plazma5, R.drawable.plazma6, R.drawable.plazma7,
@@ -78,11 +81,19 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private int[] monsterIds = {R.drawable.monster1, R.drawable.monster2, R.drawable.monster3, R.drawable.monster4, R.drawable.monster5, R.drawable.monster6, R.drawable.monster7,
             R.drawable.monster8, R.drawable.monster9};
 
+    //numbers
+    private int[] numbersIds = {R.drawable.num0, R.drawable.num1, R.drawable.num2, R.drawable.num3, R.drawable.num4, R.drawable.num5, R.drawable.num6,
+            R.drawable.num7, R.drawable.num8, R.drawable.num9,R.drawable.dot};
+
 
     private GameObject background_low0;
     private GameObject background_low1;
     private GameObject background_low2;
     private GameObject background_low3;
+
+    private LinkedList<GameObject> timeBoard = new LinkedList<>();
+    private GameObject number;
+
 
     //monster
     private LinkedList<GameObject> monsterList = new LinkedList<>();
@@ -135,6 +146,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private GameObject backButtonPressed;
     private GameObject menuButtonPressed;
 
+    private MyPoint shipPosition;
+
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
@@ -143,7 +156,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         textureProgram = new TextureShaderProgram(context);
 
         state = GameState.GAME_STARTED;
-
+        shipPosition = new MyPoint(-0.3f,-03f);
         //game elements
         background = new GameObject(context, -1, -1, 2, 2, R.drawable.sky_background);
         //ration w/h
@@ -151,6 +164,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         background_low1 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
         background_low0.setSpeed(0.002f);
         background_low1.setSpeed(0.002f);
+
 
 
         background_low2 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_first_small_chai);
@@ -168,7 +182,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         launchYellowStars();
 
 
-        lifeBar = new GameObject(context, -0.9f, 0.65f, 0.5f, 0.25f, R.drawable.life_bar);
+        lifeBar = new GameObject(context, -0.95f, 0.65f, 0.5f, 0.3f, R.drawable.life_bar);
         populateMonsters();
 
         ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
@@ -180,20 +194,70 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         sfondoGameOver = new GameObject(context, -1f, -1f, 2f, 2f, R.drawable.game_over);
         sfondoGamePaused = new GameObject(context, -1f, -1f, 2f, 2f, R.drawable.back_paused);
 
-        againButton = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.again_button);
-        againButtonPressed = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.again_button_pressed);
+        againButton = new GameObject(context, 0.125f, -0.375f, 0.25f, 0.25f, R.drawable.again_button);
+        againButtonPressed = new GameObject(context, 0.125f, -0.375f, 0.25f, 0.25f, R.drawable.again_button_pressed);
 
         backButton = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.back_button);
         backButtonPressed = new GameObject(context, -0.25f, -0.25f, 0.5f, 0.5f, R.drawable.back_button_pressed);
 
-        menuButton = new GameObject(context, 0.25f, 0.25f, 0.5f, 0.5f, R.drawable.menu_button);
-        menuButtonPressed = new GameObject(context, 0.25f, 0.25f, 0.5f, 0.5f, R.drawable.menu_button_pressed);
+        menuButton = new GameObject(context, -0.375f, -0.375f, 0.25f, 0.25f, R.drawable.menu_button);
+        menuButtonPressed = new GameObject(context, -0.375f, -0.375f, 0.25f, 0.25f, R.drawable.menu_button_pressed);
 
+
+        populateNumbers();
+
+    }
+    float startingNumber_posX = -0.5f;
+    float startingNumber_posY = 0.7f;
+    float numberWidth = 0.18f;
+    float numberHeight = 0.2f;
+
+    private GameObject number1;
+    private GameObject number2;
+    private GameObject number3;
+    private GameObject number4;
+    private GameObject divider;
+    public void populateNumbers(){
+
+        for (int i = 0; i< 11; i++){
+            number = new GameObject(context,startingNumber_posX,0.7f,numberWidth,numberHeight,numbersIds[i]);
+            timeBoard.add(number);
+        }
+
+        number1= timeBoard.get(0);  //-->0
+        number1.setX(number1.getX() + numberWidth);
+        number1.updatePosition();
+
+        number2= timeBoard.get(0);  //-->0
+        number2.setX(number2.getX() + 2*numberWidth);
+        number2.updatePosition();
+
+        divider = timeBoard.get(10); //-->:
+        divider.setX(divider.getX() + 3* numberWidth);
+        divider.updatePosition();
+
+        number3= timeBoard.get(0);  //-->0
+        number3.setX(number3.getX() + 4*numberWidth);
+        number3.updatePosition();
+
+        number4= timeBoard.get(0);  //-->0
+        number4.setX(number4.getX() + 5*numberWidth);
+        number4.updatePosition();
+
+    }
+
+
+    public void drawTimeBoard(){
+            drawElement(number1);
+        drawElement(number2);
+        drawElement(divider);
+        drawElement(number3);
+        drawElement(number4);
     }
 
     public void populateMonsters() {
         for (int i = 0; i < monsterIds.length; i++) {
-            monster = new GameObject(context, -0.9f, 0.65f, 0.5f, 0.25f, monsterIds[i]);
+            monster = new GameObject(context, -0.95f, 0.65f, 0.5f, 0.3f, monsterIds[i]);
             monsterList.add(monster);
         }
     }
@@ -203,7 +267,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             float y = -0.5f + i * 0.16666f;
             float randY = (float) Math.random() * (6);
             float x = 1f + 0.3f * randY;
-            single_yellow_star = new Enemy(context, x, y, 0.10f, 0.15f, yellowStarsId);
+            single_yellow_star = new Enemy(context, x, y, 0.07f, 0.12f, yellowStarsId);
             single_yellow_star.setLineaMovement(true);
             yellowStars.add(single_yellow_star);
         }
@@ -211,11 +275,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
     public void launchStars() {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 6; i++) {
             float y = -0.3f + i * 0.16666f;
             float randY = (float) Math.random() * (6);
             float x = 1f + 0.3f * randY;
-            enemy = new Enemy(context, x, y, 0.10f, 0.15f, whiteStarsId);
+            enemy = new Enemy(context, x, y, 0.10f, 0.18f, whiteStarsId);
             enemy.setLineaMovement(true);
             enemies.add(enemy);
         }
@@ -269,7 +333,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             drawLowBackgroundStrips();
             drawLowBackgroundStrips2();
 
-
+            drawTimeBoard();
             if(level == 0) {
                 for (Iterator it = enemies.iterator(); it.hasNext(); ) {
                     Enemy en = (Enemy) it.next();
@@ -455,8 +519,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         } else if (state == GameState.GAME_OVER) {
             //handle game over state
             drawElement(sfondoGameOver);
-
-
+            drawElement(menuButton);
             drawElement(againButton);
         }
     }
@@ -739,6 +802,59 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public void setState(GameState state) {
         this.state = state;
     }
+
+
+    boolean touchpresssed = false;
+    public void handleTouchPress(float normalizedX, float normalizedY) {
+        if(intersect(new MyPoint(normalizedX, normalizedY), new Square(ship.getX(), ship.getY(), ship.getWidth(), ship.getHeight()))){
+            touchpresssed = true;
+        }
+
+
+    }
+
+    public void handleTouchDrag(float normalizedX, float normalizedY) {
+        if(touchpresssed){
+
+            shipPosition = new MyPoint(normalizedX, normalizedY);
+            //ship.updatePosition(normalizedX, normalizedY);
+        }
+
+    }
+
+    public void handleTouchUp(float normalizedX, float normalizedY) {
+        touchpresssed = false;
+    }
+
+    public boolean intersect(MyPoint p, Square q){
+    if(p.pointX > q.pointX && p.pointX < q.pointX+q.width && p.pointY > q.pointY && p.pointY < q.pointY+q.height) return true;
+
+        return false;
+    }
+
+    public class Square{
+        float pointX;
+        float pointY;
+        float width;
+        float height;
+
+        public Square(float x, float y, float width, float height){
+            pointX = x;
+            pointY = y;
+            this.width = width;
+            this.height = height;
+
+        }
+    }
+    public class MyPoint{
+        float pointX;
+        float pointY;
+        public MyPoint(float x, float y){
+            pointX = x;
+            pointY = y;
+        }
+    }
+
 }
 
 

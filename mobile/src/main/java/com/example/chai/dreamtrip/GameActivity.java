@@ -10,6 +10,7 @@ import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -47,7 +48,6 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
         mySurfaceView.setRenderer(myRenderer);
 
         // set touch listener
-        /*
         mySurfaceView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -91,7 +91,7 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
                     return false;
                 }
             }
-        });*/
+        });
 
         initGoogleApiClient();
         receiver = new BroadcastReceiver() {
