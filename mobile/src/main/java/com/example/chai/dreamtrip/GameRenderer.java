@@ -62,6 +62,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private GameObject background_low1;
     private GameObject background_low2;
     private GameObject background_low3;
+    private ArrayList<GameObject> backgroundStripList = new ArrayList<>();
+    private GameObject background;
 
     private float unitX;
     private float unitY;
@@ -92,6 +94,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
         //game elements
+        background = new GameObject(context, -1, -1, 2, 2, R.drawable.sky_background);
         //ration w/h
         background_low0 = new GameObject(context, -1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
         background_low1 = new GameObject(context, 1f, -1f, 4f, 0.856f, R.drawable.land_second_small);
