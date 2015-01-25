@@ -28,7 +28,6 @@ public class ControlActivity extends Activity implements SensorEventListener, Go
     private float gravity[] = {9.81f, 9.81f, 9.81f}; //earth acceleration
     private float linear_acceleration[] = {0f, 0f, 0f};
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -2,11 +2,14 @@ package com.example.chai.dreamtrip;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -18,7 +21,11 @@ import android.widget.ImageView;
 
 import com.example.chai.dreamtrip.utils.BitmapUtils;
 
-public class StartActivity extends Activity{
+import java.util.concurrent.TimeUnit;
+
+public class StartActivity extends Activity {
+
+    ImageView loading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +51,7 @@ public class StartActivity extends Activity{
         ImageView ship = (ImageView) findViewById(R.id.ship);
         ship.setScaleX(scaleX);
         ship.setScaleY(scaleY);
+        ship.setY(50 * scaleY);
         ship.setBackgroundResource(R.drawable.ship_animation);
         AnimationDrawable shipAnimation = (AnimationDrawable) ship.getBackground();
         shipAnimation.start();
@@ -58,7 +66,7 @@ public class StartActivity extends Activity{
         bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
         start.setImageBitmap(bm);
         start.setX(600 * scaleX);
-        start.setY(180 * scaleY);
+        start.setY(220 * scaleY);
         start.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -72,7 +80,22 @@ public class StartActivity extends Activity{
                     bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
                     start.setImageBitmap(bm);
 
-                    startActivity(new Intent(StartActivity.this, GameActivity.class));
+                    loading = (ImageView) findViewById(R.id.loading);
+                    loading.setBackgroundResource(R.drawable.loading_animation);
+                    loading.setVisibility(View.VISIBLE);
+                    AnimationDrawable shipAnimation = (AnimationDrawable) loading.getBackground();
+                    shipAnimation.start();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                TimeUnit.MILLISECONDS.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            startActivity(new Intent(StartActivity.this, GameActivity.class));
+                        }
+                    }).start();
                     return true;
                 } else
                     return false;
@@ -83,7 +106,7 @@ public class StartActivity extends Activity{
         bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
         options.setImageBitmap(bm);
         options.setX(360 * scaleX);
-        options.setY(430 * scaleY);
+        options.setY(470 * scaleY);
         options.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -106,7 +129,7 @@ public class StartActivity extends Activity{
         bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
         credits.setImageBitmap(bm);
         credits.setX(400 * scaleX);
-        credits.setY(680 * scaleY);
+        credits.setY(720 * scaleY);
         credits.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -124,6 +147,26 @@ public class StartActivity extends Activity{
                     return false;
             }
         });
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        MediaPlayer mediaPlayer = MediaPlayer.create(StartActivity.this, R.raw.main_music);
+        mediaPlayer.start();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        loading.setVisibility(View.GONE);
+    }
+
+    // when closing the current activity, the service will automatically shut down(disconnected).
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }
+
+

@@ -70,7 +70,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         unitX = 2 / screenWidth;
         unitY = 2 / screenHeight;
         normalize = unitX / unitY;
-
     }
 
 
@@ -99,7 +98,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         backgroundStripList.add(background_low3);
 
         ship = new GameObject(context, 0f, 0f, 0.2f, 0.18f, shipsResId);
-
 
     }
 
@@ -254,7 +252,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     * Called to update the ship position*/
     public void updateShipPosition(float x, float y) {
-
         ship.updatePosition(x,y);
 
 

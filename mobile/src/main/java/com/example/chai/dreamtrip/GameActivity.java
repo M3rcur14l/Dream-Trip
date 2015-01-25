@@ -13,7 +13,6 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -25,7 +24,6 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
 
     private GLSurfaceView mySurfaceView;
     private GameRenderer myRenderer;
-
 
     private GoogleApiClient mApiClient;
     private BroadcastReceiver receiver;
@@ -94,13 +92,12 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
             public void onReceive(Context context, Intent intent) {
                 String result = intent.getStringExtra("MESSAGE");
                 String values[] = result.split(",");
-
-
-                requestUpdateToRenderer(Float.parseFloat(values[1]) / 40, Float.parseFloat(values[0]) / 25);
-
-
+                float x = Float.parseFloat(values[1]);
+                float y = Float.parseFloat(values[0]);
+                requestUpdateToRenderer(x / 40, y / 25);
             }
         };
+
     }
 
     public void loadUIElement() {
@@ -125,50 +122,44 @@ public class GameActivity extends Activity implements GoogleApiClient.Connection
 
     //method to call to send position to the renderer
     public void requestUpdateToRenderer(final float x, final float y) {
-
         mySurfaceView.queueEvent(new Runnable() {
             @Override
             public void run() {
-
                 //update the ship position
                 myRenderer.updateShipPosition(x, y);
-
             }
         });
     }
+
 
     @Override
     protected void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("REQUEST_PROCESSED"));
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mySurfaceView.onPause();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mySurfaceView.onResume();
-
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
-
     }
 
+    // when closing the current activity, the service will automatically shut down(disconnected).
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
-
     }
 
     @Override
