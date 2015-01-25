@@ -45,7 +45,6 @@ public class StartActivity extends Activity {
 
         loading = (ImageView) findViewById(R.id.loading);
         loading.setBackgroundResource(R.drawable.loading_animation);
-        loading.setVisibility(View.VISIBLE);
         ImageView blinkingStars1 = (ImageView) findViewById(R.id.blinking_stars_1);
         Animation blinkAnimation1 = AnimationUtils.loadAnimation(this, R.anim.blinking1);
         blinkingStars1.startAnimation(blinkAnimation1);
@@ -84,6 +83,7 @@ public class StartActivity extends Activity {
                     bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
                     start.setImageBitmap(bm);
 
+                    loading.setVisibility(View.VISIBLE);
                     AnimationDrawable shipAnimation = (AnimationDrawable) loading.getBackground();
                     shipAnimation.start();
                     new Thread(new Runnable() {
